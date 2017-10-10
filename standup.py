@@ -88,7 +88,7 @@ bad_statuses = {
 
 @command('standup',
          help='say a completely unacceptable thing for a standup status')
-def standup(client, channel, nick, message, matches):
+def standup(client, channel, nick, message, *args):
     key = random.choice(bad_statuses.keys())
     phrase = ''
     for item in bad_statuses[key]:
