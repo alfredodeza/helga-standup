@@ -89,7 +89,8 @@ bad_statuses = {
 @command('standup',
          help='say a completely unacceptable thing for a standup status')
 def standup(client, channel, nick, message, *args):
-    if len(args) == 0:
+    arguments = args[1]
+    if not arguments:
         # make a phrase
         phrases = []
         key = random.choice(bad_statuses.keys())
@@ -99,23 +100,25 @@ def standup(client, channel, nick, message, *args):
 
         phrases.append(phrase)
 
-        count = db.yelling.count()
+        count = db.standup.count()
         if count:
             status = db.standup.find()[random.randrange(count)]
             phrases.append(status['msg'])
 
         client.msg(channel, random.choice(phrases))
 
-    if len(args) == 2:
-        cmd, status = args[1][0], args[1][1:]
-
+    else:
+        cmd = arguments.pop(0)
+        message = ' '.join(arguments)
+        if not message:
+            return 'I need an actual phrase to add or remove'
         if cmd == 'add':
             db.standup.update_one({
                 'msg': message,
             }, {'$set': {'msg': message}}, upsert=True)
 
         if cmd == 'remove':
-            status_to_forget = ' '.join(status)
+            status_to_forget = message
 
             logger.debug('will attempt to purge: {}'.format(status_to_forget))
 
